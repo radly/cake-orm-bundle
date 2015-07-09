@@ -27,8 +27,5 @@
         "psr-4": {
           "RadBundle\\CakeORM\\": "."
         }
-    },
-    "extra": {
-        "installer-name": "CakeORM"
     }
 }
