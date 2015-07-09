@@ -1,0 +1,34 @@
+{
+    "name": "radphp/cake-orm-bundle",
+    "description": "CakePHP ORM bundle for RadPHP",
+    "keywords": ["RadPHP", "CakePHP", "ORM", "bundle"],
+    "type": "radphp-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammad Abdoli Rad",
+            "email": "m.abdolirad@gmail.com",
+            "role": "Project Founder"
+        },
+        {
+            "name": "Omid Mottaghi Rad",
+            "email": "omidmr@gmail.com",
+            "role": "Project Founder"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.21",
+        "radly/radphp": "dev-master",
+        "cakephp/orm": "3.0.*",
+        "cakephp/log": "3.0.*",
+        "cakephp/cache": "3.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+          "RadBundle\\CakeORM\\": "."
+        }
+    },
+    "extra": {
+        "installer-name": "CakeORM"
+    }
+}
