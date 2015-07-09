@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": ">=5.5.21",
-        "radly/radphp": "dev-master",
+        "radphp/radphp": "dev-master",
         "cakephp/orm": "3.0.*",
         "cakephp/log": "3.0.*",
         "cakephp/cache": "3.0.*"
