@@ -1,9 +1,10 @@
 <?php
 
-namespace RadBundle\CakeORM;
+namespace CakeOrm;
 
 use Cake\Cache\Cache;
 use Cake\Datasource\ConnectionManager;
+use CakeOrm\Event\CakeORMSubscriber;
 use Rad\Config;
 use Rad\Core\Bundle;
 
@@ -22,10 +23,12 @@ class Bootstrap extends Bundle
         parent::startup();
 
         Config::load(__DIR__ . DS . 'Resource' . DS . 'config' . DS . 'config.php');
-        foreach (Config::get('CakeOrm.Datasources', []) as $name => $dataSource) {
+        foreach (Config::get('cake_orm.datasources', []) as $name => $dataSource) {
             ConnectionManager::config($name, $dataSource);
         }
 
-        Cache::config(Config::get('CakeOrm.Cache', []));
+        Cache::config(Config::get('cake_orm.cache', []));
+
+        $this->getEventManager()->addSubscriber(new CakeORMSubscriber());
     }
 }

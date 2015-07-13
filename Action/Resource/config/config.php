@@ -8,9 +8,9 @@ return [
                 'driver' => 'Cake\Database\Driver\Postgres',
                 'persistent' => false,
                 'host' => 'localhost',
-                'username' => 'radphp_user',
-                'password' => 'rad123',
-                'database' => 'radphp_db',
+                'username' => 'db_user',
+                'password' => 'db_pass',
+                'database' => 'db_name',
                 'encoding' => 'utf8',
                 'timezone' => 'UTC',
                 'cacheMetadata' => true

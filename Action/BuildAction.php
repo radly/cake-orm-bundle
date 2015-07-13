@@ -1,10 +1,11 @@
 <?php
 
-namespace RadBundle\CakeORM\Action;
+namespace CakeOrm\Action;
 
 use App\Action\AppAction;
 use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
+use Cake\Utility\Inflector;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
@@ -20,6 +21,9 @@ use Rad\Utility\Inflection;
  */
 class BuildAction extends AppAction
 {
+    protected $tableRegistryCode = [];
+    protected $tablesModel = [];
+
     /**
      * Cli method
      *
@@ -56,8 +60,7 @@ class BuildAction extends AppAction
             foreach ($tables as $table) {
                 $schemaTable = new Table($table->getAttribute('name'));
 
-                $this->buildTableRegistry($table, $bundle);
-
+                $this->prepareTableRegistry($table, $bundle);
                 $this->prepareColumn($table, $xpath, $schemaTable);
                 $this->prepareForeignConstraint($table, $xpath, $schemaTable);
                 $this->prepareUniqueConstraint($table, $xpath, $schemaTable);
@@ -75,35 +78,137 @@ class BuildAction extends AppAction
                 }
 
                 file_put_contents($file, $tmpSql);
-                $climate->backgroundLightBlue(sprintf('Create SQL file "%s".', $file));
+                $climate->lightGray(sprintf('Create SQL file "%s".', $file));
             }
+
+            $climate->info('Dump table registry config ...');
+            $this->dumpTableRegistry($climate, $bundle);
+
+            $climate->info('Dump model classes ...');
+            $this->dumpModelClasses($climate, $bundle);
+            $climate->br(2);
         }
     }
 
     /**
-     * Build table registry
+     * Prepare table registry
      *
      * @param DOMElement $table
      * @param string     $bundle Bundle name
      */
-    protected function buildTableRegistry(DOMElement $table, $bundle)
+    protected function prepareTableRegistry(DOMElement $table, $bundle)
     {
-        $mapDirPath = Bundles::getPath($bundle) . DS . 'Domain' . DS . 'Model' . DS . 'map';
+        if (($tableName = $table->getAttribute('name')) !== '') {
+            $tmpTableClass = null;
+            if (!empty($tableClass = $table->getAttribute('tableClass'))) {
+                $tmpTableClass = "'" . $tableClass . "'";
+            }
+
+            $tmpEntityClass = null;
+            if (!empty($entityClass = $table->getAttribute('entityClass'))) {
+                $tmpEntityClass = "'" . $entityClass . "'";
+            }
+
+            $tmpAlias = null;
+            if (!empty($alias = $table->getAttribute('alias'))) {
+                $tmpAlias = "'" . $alias . "'";
+            }
+
+            $code = <<<PHP
+Cake\ORM\TableRegistry::config(
+    '$bundle.Categories',
+    [
+        'table' => '$tableName',
+        'alias' => $tmpAlias,
+        'className' => $tmpTableClass,
+        'entityClass' => $tmpEntityClass,
+    ]
+);
+PHP;
+
+            $this->tablesModel[$bundle][] = [
+                'tableClass' => $tableClass,
+                'entityClass' => $entityClass,
+                'alias' => $alias
+            ];
+            $this->tableRegistryCode[$bundle][] = $code;
+        }
+    }
+
+    /**
+     * Dump table registry
+     *
+     * @param CLImate $climate
+     * @param string  $bundle
+     *
+     * @throws \Rad\Core\Exception\MissingBundleException
+     */
+    protected function dumpTableRegistry(CLImate $climate, $bundle)
+    {
+        $mapDirPath = Bundles::getPath($bundle) . DS . 'Domain' . DS . 'map';
+        $tableRegistryConfigFile = $mapDirPath . DS . 'table_registry_config.php';
+
         if (!is_dir($mapDirPath)) {
             mkdir($mapDirPath, 0777, true);
         }
 
-        if (($className = $table->getAttribute('className')) !== '') {
-            $tableName = !empty($table->getAttribute('name')) ? "'" . $table->getAttribute('name') . "'" : null;
-            $alias = !empty($table->getAttribute('alias')) ? "'" . $table->getAttribute('alias') . "'" : null;
+        if (is_array($this->tableRegistryCode[$bundle])) {
+            file_put_contents(
+                $tableRegistryConfigFile,
+                '<?php' . "\n\n" . implode("\n\n", $this->tableRegistryCode[$bundle])
+            );
+        }
+    }
 
-            $code = <<<PHP
-    TableRegistry::config('$bundle.Categories', [
-        'table' => $tableName,
-        'alias' => $alias,
-        'className' => '$className',
-    ]);
-PHP;
+    /**
+     * Dump model classes
+     *
+     * @param CLImate $climate
+     * @param string  $bundle
+     */
+    protected function dumpModelClasses(CLImate $climate, $bundle)
+    {
+        if (is_array($this->tablesModel[$bundle])) {
+            foreach ($this->tablesModel[$bundle] as $tableSpec) {
+                $alias = $tableSpec['alias'];
+                if ($tableSpec['tableClass']) {
+                    $tableClassPath = SRC_DIR . DS . str_replace('\\', '/', $tableSpec['tableClass']) . '.php';
+                    $tableClassDir = dirname($tableClassPath);
+                    $tableClassName = trim(
+                        substr($tableSpec['tableClass'], strrpos($tableSpec['tableClass'], '\\')),
+                        '\\'
+                    );
+                    $tableClassNamespace = trim(
+                        substr($tableSpec['tableClass'], 0, strrpos($tableSpec['tableClass'], '\\')),
+                        '\\'
+                    );
+
+                    if (!is_file($tableClassPath)) {
+                        if (!is_dir($tableClassDir)) {
+                            mkdir($tableClassDir, 0777, true);
+                        }
+
+                        ob_start();
+                        echo '<?php';
+                        include Bundles::getPath('CakeOrm') . '/Resource/config/table_template.php';
+                        $content = ob_get_contents();
+                        ob_end_clean();
+
+                        file_put_contents($tableClassPath, $content);
+                        $climate->lightGray(sprintf('Create table class "%s".', $tableSpec['tableClass']));
+                    } else {
+                        $climate->lightMagenta(sprintf('Table class "%s" exists.', $tableSpec['tableClass']));
+                    }
+                }
+
+                //if ($tableSpec['entityClass']) {
+                //    $entityClassPath = SRC_DIR . DS . str_replace('\\', '/', $tableSpec['entityClass']);
+                //    $entityClassName = trim(
+                //        substr($tableSpec['entityClass'], strrpos($tableSpec['entityClass'], '\\')),
+                //        '\\'
+                //    );
+                //}
+            }
         }
     }
 
