@@ -5,7 +5,7 @@ namespace CakeOrm;
 use Cake\Cache\Cache;
 use Cake\Datasource\ConnectionManager;
 use CakeOrm\Event\CakeORMSubscriber;
-use Rad\Config;
+use Rad\Configure\Config;
 use Rad\Core\Bundle;
 
 /**

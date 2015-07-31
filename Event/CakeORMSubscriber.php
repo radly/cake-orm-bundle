@@ -3,7 +3,6 @@
 namespace CakeOrm\Event;
 
 use Rad\Application;
-use Rad\Config;
 use Rad\Core\Bundles;
 use Rad\Events\Event;
 use Rad\Events\EventManager;
