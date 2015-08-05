@@ -2,7 +2,7 @@
 
 namespace CakeOrm\Event;
 
-use Rad\Application;
+use Application;
 use Rad\Core\Bundles;
 use Rad\Events\Event;
 use Rad\Events\EventManager;
