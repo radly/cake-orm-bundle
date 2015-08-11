@@ -5,6 +5,7 @@ namespace CakeOrm\Action;
 use App\Action\AppAction;
 use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
+use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use DOMDocument;
 use DOMElement;
@@ -115,7 +116,7 @@ class BuildAction extends AppAction
 
             $code = <<<PHP
 Cake\ORM\TableRegistry::config(
-    '$bundle.Categories',
+    '$bundle.$alias',
     [
         'table' => '$tableName',
         'alias' => $tmpAlias,
@@ -226,16 +227,17 @@ PHP;
             $schemaTable->addColumn(
                 $column->getAttribute('name'),
                 [
-                    'type' => !empty($column->getAttribute('type')) ? $column->getAttribute('type') : null,
-                    'length' => !empty($column->getAttribute('length')) ? $column->getAttribute('length') : null,
-                    'precision' => !empty($column->getAttribute('precision')) ? $column->getAttribute(
+                    'type' => $column->getAttribute('type') !== '' ? $column->getAttribute('type') : null,
+                    'length' => $column->getAttribute('length') !== '' ? $column->getAttribute('length') : null,
+                    'precision' => $column->getAttribute('precision') !== '' ? $column->getAttribute(
                         'precision'
                     ) : null,
-                    'default' => !empty($column->getAttribute('default')) ? $column->getAttribute('default') : null,
-                    'null' => !empty($column->getAttribute('null')) ? $column->getAttribute('null') : null,
-                    'fixed' => !empty($column->getAttribute('fixed')) ? $column->getAttribute('fixed') : null,
-                    'unsigned' => !empty($column->getAttribute('unsigned')) ? $column->getAttribute('unsigned') : null,
-                    'comment' => !empty($column->getAttribute('comment')) ? $column->getAttribute('comment') : null
+                    'default' => $column->getAttribute('default') !== '' ? $column->getAttribute('default') : null,
+                    'null' => $column->getAttribute('null') !== '' ? filter_var($column->getAttribute('null'),
+                        FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]) : null,
+                    'fixed' => $column->getAttribute('fixed') !== '' ? $column->getAttribute('fixed') : null,
+                    'unsigned' => $column->getAttribute('unsigned') !== '' ? $column->getAttribute('unsigned') : null,
+                    'comment' => $column->getAttribute('comment') !== '' ? $column->getAttribute('comment') : null
                 ]
             );
         }
