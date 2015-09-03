@@ -5,8 +5,6 @@ namespace CakeOrm\Action;
 use App\Action\AppAction;
 use Cake\Database\Schema\Table;
 use Cake\Datasource\ConnectionManager;
-use Cake\ORM\TableRegistry;
-use Cake\Utility\Inflector;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
@@ -40,13 +38,14 @@ class BuildAction extends AppAction
 
         $sql = [];
         foreach (Bundles::getLoaded() as $bundle) {
-            $climate->info(sprintf('Bundle %s ...', $bundle));
+            $climate->backgroundLightGray()->info(sprintf('Bundle %s ...', $bundle));
             $path = Bundles::getPath($bundle);
             $sqlFilename = Inflection::underscore($bundle) . '.sql';
             $schemaPath = $path . DS . 'Resource' . DS . 'config' . DS . 'schema.xml';
 
             if (!is_file($schemaPath)) {
                 $climate->lightRed(sprintf('File "%s" does not exists.', $schemaPath));
+                $climate->br(2);
                 continue;
             }
 
@@ -80,6 +79,7 @@ class BuildAction extends AppAction
                 file_put_contents($file, $tmpSql);
                 $climate->lightGray(sprintf('Create SQL file "%s".', $file));
             }
+            $sql = [];
 
             $climate->info('Dump table registry config ...');
             $this->dumpTableRegistry($climate, $bundle);
