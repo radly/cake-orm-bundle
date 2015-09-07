@@ -20,7 +20,7 @@ class CakeORMSubscriber implements EventSubscriberInterface
      */
     public function subscribe(EventManager $eventManager)
     {
-        $eventManager->attach(Application::EVENT_AFTER_LOAD_BUNDLES, [$this, 'loadTableRegistryMap']);
+        $eventManager->attach(Application::EVENT_AFTER_BUNDLE_STARTUP, [$this, 'loadTableRegistryMap']);
     }
 
     /**

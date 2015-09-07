@@ -23,14 +23,14 @@ return [
             ],
             '_cake_core_' => [
                 'className' => 'File',
-                'prefix' => 'radphp_cake_core_',
+                'prefix' => '_rad_core_',
                 'path' => CACHE_DIR . DS . 'cake' . DS . 'persistent',
                 'serialize' => true,
                 'duration' => '+2 minutes',
             ],
             '_cake_model_' => [
                 'className' => 'File',
-                'prefix' => 'radphp_cake_model_',
+                'prefix' => '_rad_model_',
                 'path' => CACHE_DIR . DS . 'cake' . DS . 'models',
                 'serialize' => true,
                 'duration' => '+2 minutes',
