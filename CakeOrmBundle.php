@@ -4,6 +4,7 @@ namespace CakeOrm;
 
 use Cake\Cache\Cache;
 use Cake\Datasource\ConnectionManager;
+use Cake\Log\Log;
 use CakeOrm\Event\CakeORMSubscriber;
 use Rad\Configure\Config;
 use Rad\Core\AbstractBundle;
@@ -25,6 +26,20 @@ class CakeOrmBundle extends AbstractBundle
         }
 
         Cache::config(Config::get('cake_orm.cache', []));
+
+        if (!is_dir($cakeLogPath = LOG_DIR . DS . 'cake')) {
+            mkdir($cakeLogPath, 0777, true);
+        }
+
+        Log::config(
+            'queries',
+            [
+                'className' => 'File',
+                'path' => LOG_DIR . DS . 'cake' . DS,
+                'file' => 'queries.log',
+                'scopes' => ['queriesLog']
+            ]
+        );
 
         $this->getEventManager()->addSubscriber(new CakeORMSubscriber());
     }

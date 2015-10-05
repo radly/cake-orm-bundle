@@ -13,7 +13,8 @@ return [
                 'database' => 'db_name',
                 'encoding' => 'utf8',
                 'timezone' => 'UTC',
-                'cacheMetadata' => true
+                'cacheMetadata' => true,
+                'log' => true
             ]
         ],
         'cache' => [
